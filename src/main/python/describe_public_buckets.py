@@ -7,6 +7,7 @@
 #
 
 import boto3
+import botocore
 import logging
 import sys
 
@@ -54,6 +55,15 @@ def describe_public_buckets():
                                     public_buckets[v] = [bucket_dictionary['Name']]
                                 else:
                                     public_buckets[v] += [bucket_dictionary['Name']]
+            try:
+                bucket_policy = s3client.get_bucket_policy_status(Bucket=bucket_dictionary['Name'])
+                if bucket_policy['PolicyStatus']['IsPublic'] is True:
+                    if 'PUBLIC_POLICY' not in public_buckets:
+                        public_buckets['PUBLIC_POLICY'] = [bucket_dictionary['Name']]
+                    else:
+                        public_buckets['PUBLIC_POLICY'] += [bucket_dictionary['Name']]
+            except botocore.exceptions.ClientError:
+                continue
 
         logger.info('The following buckets have public permissions:')
         logger.info(pprint(public_buckets))
