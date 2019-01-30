@@ -44,7 +44,10 @@ def describe_public_buckets():
         list_bucket_response = s3client.list_buckets()
 
         for bucket_dictionary in list_bucket_response['Buckets']:
-            bucket_acl_response = s3client.get_bucket_acl(Bucket=bucket_dictionary['Name'])
+            try:
+               bucket_acl_response = s3client.get_bucket_acl(Bucket=bucket_dictionary['Name'])
+            except botocore.exceptions.ClientError:
+               continue
 
             for grant in bucket_acl_response['Grants']:
                 for (k, v) in grant.iteritems():
